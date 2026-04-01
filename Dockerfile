@@ -9,6 +9,7 @@ COPY client.py .
 COPY inference.py .
 COPY __init__.py .
 COPY server/ server/
+COPY openenv.yaml .
 
 EXPOSE 7860
 

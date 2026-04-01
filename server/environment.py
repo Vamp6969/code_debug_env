@@ -35,14 +35,14 @@ TASKS: Dict[str, Dict[str, Any]] = {
         "broken_code": (
             "def is_palindrome(s):\n"
             "    s = s.lower()\n"
-            "    return s == s  # wrong: should compare s to s reversed\n"
+            "    return s == s\n"
             "\n"
             "def count_vowels(text):\n"
             "    vowels = \"aeiou\"\n"
             "    count = 0\n"
             "    for char in text:\n"
             "        if char in vowels:\n"
-            "            count += 2  # wrong: should be count += 1\n"
+            "            count += 2\n"
             "    return count\n"
         ),
         "tests": [
