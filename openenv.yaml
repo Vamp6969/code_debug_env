@@ -1,0 +1,4 @@
+name: code-debug-env
+version: "1.0.0"
+description: "Python code debugging environment for RL agents"
+tags: ["openenv", "code-debugging", "reinforcement-learning"]
