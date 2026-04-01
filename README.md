@@ -138,10 +138,10 @@ pip install openenv-core fastapi uvicorn openai
 ### Step 1: Start the server
 
 ```bash
-uv run uvicorn server.app:app --host 0.0.0.0 --port 8000
+uv run server
 ```
 
-Leave this running in a terminal.
+Leave this running in a terminal. The server starts on port 7860.
 
 ### Step 2: Run the agent
 
@@ -150,7 +150,7 @@ In a separate terminal:
 ```bash
 export HF_TOKEN=your_huggingface_token
 export MODEL_NAME=meta-llama/Llama-3.1-8B-Instruct
-export ENV_URL=http://localhost:8000
+export ENV_URL=http://localhost:7860
 
 uv run python inference.py
 ```

@@ -65,7 +65,7 @@ def run_task(env_url: str, task_id: str, difficulty: str) -> float:
 
 
 if __name__ == "__main__":
-    ENV_URL = os.getenv("ENV_URL", "http://localhost:8000")
+    ENV_URL = os.getenv("ENV_URL", "http://localhost:7860")
     tasks = [
         ("easy_001", "easy"),
         ("medium_001", "medium"),
