@@ -27,7 +27,7 @@ Built for the Meta x Scaler OpenEnv Hackathon.
 4. The agent receives a score (0.0 to 1.0) and feedback on which tests failed
 5. The agent can retry up to 5 times per task
 
-There are 3 tasks with increasing difficulty. The agent must fix syntax errors, logic bugs, and interdependent bugs across multiple functions.
+There are 8 tasks across 3 difficulty levels. The agent must fix syntax errors, logic bugs, data structure misuse, and interdependent bugs across multiple functions.
 
 ---
 
@@ -37,7 +37,7 @@ There are 3 tasks with increasing difficulty. The agent must fix syntax errors, 
 code_debug_env/
   models.py            - Pydantic models (Action, Observation, State)
   client.py            - OpenEnv client for connecting to the server
-  inference.py         - LLM-based agent that solves all 3 tasks
+  inference.py         - LLM-based agent that solves all 8 tasks
   openenv.yaml         - OpenEnv manifest
   pyproject.toml       - Python project config
   Dockerfile           - Container config for deployment
@@ -50,26 +50,27 @@ code_debug_env/
 
 ## Tasks
 
-### easy_001 (Easy) - Syntax Errors
+### Easy (3 tasks)
 
-Fix missing colons and parentheses in a `calculate_average` function.
+**easy_001** - Fix syntax errors (missing colons, parentheses) in a `calculate_average` function. 5 tests.
 
-- 5 test cases
-- A basic LLM should fix this in 1 step
+**easy_002** - Fix a missing return statement and a wrong comparison operator in `find_max`. 5 tests.
 
-### medium_001 (Medium) - Logic Errors
+**easy_003** - Fix off-by-one errors in `repeat_string` and `first_n_chars`. 5 tests.
 
-Fix logic bugs in `is_palindrome` (wrong comparison) and `count_vowels` (wrong increment). The code runs without errors but produces wrong results.
+### Medium (3 tasks)
 
-- 5 test cases
-- Requires reading the code carefully, not just fixing syntax
+**medium_001** - Fix logic errors in `is_palindrome` (wrong comparison) and `count_vowels` (wrong increment). Code runs but produces wrong results. 5 tests.
 
-### hard_001 (Hard) - Interdependent Bugs
+**medium_002** - Fix a mutable state bug in `merge_dicts` (modifies original dict) and missing deduplication in `unique_sorted`. 5 tests.
 
-Fix 3 bugs across `compress_stream`, `decompress_stream`, and `stream_stats`. The bugs compensate for each other -- the broken code actually passes all tests as-is. Fixing only 1 or 2 bugs breaks everything. All 3 must be fixed together.
+**medium_003** - Fix a wrong list operation in `flatten_list` (append instead of extend) and an off-by-one slice in `chunk_list`. 5 tests.
 
-- 6 test cases
-- Requires understanding how data flows between functions
+### Hard (2 tasks)
+
+**hard_001** - Fix 3 interdependent bugs across `compress_stream`, `decompress_stream`, and `stream_stats`. The bugs compensate for each other, so the broken code passes all tests as-is. Fixing only 1 or 2 bugs breaks everything. All 3 must be fixed together. 6 tests.
+
+**hard_002** - Fix 3 bugs in a data pipeline: a boundary condition error in `filter_and_sort` (> vs >=), wrong sort order (ascending vs descending), and wrong key in `summarize` (sorts by age instead of score). 6 tests.
 
 ---
 
@@ -158,21 +159,20 @@ uv run python inference.py
 You should see output like:
 
 ```
-Task: easy_001 (easy)
-Step 1: score=1.0 tests=5/5
-
-Task: medium_001 (medium)
-Step 1: score=1.0 tests=5/5
-
-Task: hard_001 (hard)
-Step 1: score=0.0 tests=0/6
-Step 2: score=1.0 tests=6/6
-
+[START] task=easy_001 env=code-debug-env model=meta-llama/Llama-3.1-8B-Instruct
+[STEP] step=1 action=fix_code reward=0.99 done=true error=null
+[END] success=true steps=1 score=0.99 rewards=0.99
+...
 === BASELINE SCORES ===
-easy_001: 1.00
-medium_001: 1.00
-hard_001: 1.00
-Average: 1.00
+easy_001: 0.99
+easy_002: 0.99
+easy_003: 0.99
+medium_001: 0.99
+medium_002: 0.99
+medium_003: 0.99
+hard_001: 0.99
+hard_002: 0.83
+Average: 0.97
 ```
 
 ---
@@ -209,12 +209,17 @@ The Dockerfile is configured to expose port 7860, which is required by Hugging F
 
 Tested with `meta-llama/Llama-3.1-8B-Instruct`:
 
-| Task | Difficulty | Score | Steps Needed |
-|------|-----------|-------|-------------|
-| easy_001 | Easy | 1.00 | 1 |
-| medium_001 | Medium | 1.00 | 1 |
-| hard_001 | Hard | 1.00 | 2 |
-| Average | - | 1.00 | - |
+| Task | Difficulty | Score | Steps |
+|------|-----------|-------|-------|
+| easy_001 | Easy | 0.99 | 1 |
+| easy_002 | Easy | 0.99 | 1 |
+| easy_003 | Easy | 0.99 | 1 |
+| medium_001 | Medium | 0.99 | 1 |
+| medium_002 | Medium | 0.99 | 1 |
+| medium_003 | Medium | 0.99 | 1 |
+| hard_001 | Hard | 0.99 | 2 |
+| hard_002 | Hard | 0.83 | 5 |
+| **Average** | - | **0.97** | - |
 
 ---
 
@@ -225,4 +230,4 @@ Tested with `meta-llama/Llama-3.1-8B-Instruct`:
 | `HF_TOKEN` | Yes | - | Hugging Face API token |
 | `MODEL_NAME` | Yes | - | Model to use for inference |
 | `API_BASE_URL` | No | `https://router.huggingface.co/v1` | LLM API endpoint |
-| `ENV_URL` | No | `http://localhost:8000` | Environment server URL |
+| `ENV_URL` | No | `http://localhost:7860` | Environment server URL |

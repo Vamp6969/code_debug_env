@@ -117,8 +117,13 @@ if __name__ == "__main__":
     ENV_URL = os.getenv("ENV_URL", "http://localhost:7860")
     tasks = [
         ("easy_001", "easy"),
+        ("easy_002", "easy"),
+        ("easy_003", "easy"),
         ("medium_001", "medium"),
+        ("medium_002", "medium"),
+        ("medium_003", "medium"),
         ("hard_001", "hard"),
+        ("hard_002", "hard"),
     ]
     scores: dict[str, float] = {}
     for task_id, difficulty in tasks:
