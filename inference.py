@@ -1,7 +1,7 @@
 """
 Inference Script — Code Debug Environment
 ==========================================
-Structured stdout format: [START], [STEP], [END]
+Structured stdout format: [START], [STEP], [END].
 """
 
 import os
