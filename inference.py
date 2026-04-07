@@ -77,6 +77,11 @@ def run_task(env_url: str, task_id: str, difficulty: str) -> float:
                 )
                 obs = result.observation
                 reward = obs.score
+                # Clamp reward to strictly (0, 1) for validator
+                if reward <= 0.0:
+                    reward = 0.01
+                elif reward >= 1.0:
+                    reward = 0.99
                 done = result.done
                 rewards.append(reward)
                 steps = step
@@ -88,12 +93,18 @@ def run_task(env_url: str, task_id: str, difficulty: str) -> float:
                     break
 
             score = obs.score
-            success = score == 1.0
+            # Clamp score to strictly (0, 1) for validator
+            if score <= 0.0:
+                score = 0.01
+            elif score >= 1.0:
+                score = 0.99
+            success = obs.score == 1.0
 
     except Exception as e:
-        print(f"[STEP] step=1 action=fix_code reward=0.00 done=true error={e}")
+        print(f"[STEP] step=1 action=fix_code reward=0.01 done=true error={e}")
         steps = 1
-        rewards = [0.0]
+        rewards = [0.01]
+        score = 0.01
 
     success_str = "true" if success else "false"
     rewards_str = ",".join(f"{r:.2f}" for r in rewards)
