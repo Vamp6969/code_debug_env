@@ -1,4 +1,5 @@
 import os
+import sys
 
 from openai import OpenAI
 
@@ -10,14 +11,14 @@ API_KEY = os.getenv("HF_TOKEN") or os.getenv("API_KEY")
 MODEL_NAME = os.getenv("MODEL_NAME")
 MAX_STEPS = 5
 
-client_llm = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
-
 SYSTEM_PROMPT = """You are an expert Python debugger.
 You will be given broken Python code. Fix ALL bugs and return ONLY the corrected code.
 No explanations. No markdown. Just the fixed Python code."""
 
 
 def run_task(env_url: str, task_id: str, difficulty: str) -> float:
+    client_llm = OpenAI(base_url=API_BASE_URL, api_key=API_KEY or "dummy")
+
     with CodeDebugEnv(base_url=env_url).sync() as env:
         result = env.reset(episode_id=task_id)
         obs = result.observation
@@ -25,22 +26,26 @@ def run_task(env_url: str, task_id: str, difficulty: str) -> float:
         print(f"Broken code:\n{obs.broken_code}")
 
         for step in range(MAX_STEPS):
-            response = client_llm.chat.completions.create(
-                model=MODEL_NAME,
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {
-                        "role": "user",
-                        "content": (
-                            f"Fix this Python code:\n\n{obs.broken_code}\n\n"
-                            f"Feedback from last attempt: {obs.feedback}"
-                        ),
-                    },
-                ],
-                max_tokens=500,
-                temperature=0.2,
-            )
-            fixed_code = response.choices[0].message.content.strip()
+            try:
+                response = client_llm.chat.completions.create(
+                    model=MODEL_NAME or "meta-llama/Llama-3.1-8B-Instruct",
+                    messages=[
+                        {"role": "system", "content": SYSTEM_PROMPT},
+                        {
+                            "role": "user",
+                            "content": (
+                                f"Fix this Python code:\n\n{obs.broken_code}\n\n"
+                                f"Feedback from last attempt: {obs.feedback}"
+                            ),
+                        },
+                    ],
+                    max_tokens=800,
+                    temperature=0.2,
+                )
+                fixed_code = response.choices[0].message.content.strip()
+            except Exception as e:
+                print(f"LLM call failed: {e}")
+                return 0.0
 
             # Strip markdown code fences if present
             if fixed_code.startswith("```"):
